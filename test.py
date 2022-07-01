@@ -1,6 +1,5 @@
 from time import time
-from actionBar import actionBar
-from battleList import battleList
+from chat import chat
 from utils import utils
 import pygetwindow as gw
 
@@ -22,13 +21,14 @@ def getWindow():
 
 
 def main():
-    # loop_time = time()
+    loop_time = time()
     window = getWindow()
     while True:
         screenshot = utils.getScreenshot(window)
-        number = actionBar.getSlotCount(screenshot)
-        print(number)
-        # print(number)
+        #print(chat.selectServerLogTab(screenshot))
+        text = chat.readMessagesFromActiveChatTab(screenshot)
+        lootText = chat.searchInActiveChatTab(text, ['Loot of'])
+        break
         # timef = (time() - loop_time)
         # timef = timef if timef else 1
         # fps = 1 / timef

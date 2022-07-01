@@ -1,3 +1,5 @@
+import random
+import time
 import d3dshot
 import cv2
 import numpy as np
@@ -136,6 +138,16 @@ def press(key):
     pyautogui.press(key)
 
 
+def typeKeyboard(phrase):
+
+    words = list(phrase)
+    for word in words:
+        time.sleep(random.randrange(70, 190)/1000)
+        press(word)
+    time.sleep(random.randrange(70, 190) / 1000)
+    press('enter')
+
+
 def rightClick(x, y):
     pyautogui.rightClick(x, y)
 
@@ -143,3 +155,12 @@ def rightClick(x, y):
 def saveImg(arr, name):
     im = Image.fromarray(arr)
     im.save(name)
+
+def cropImg(img, x, y, width, height):
+    return img[y:y+height, x:x+width]
+
+def randomCoord(x,y,width,height):
+    x = random.randrange(x, x+width)
+    y = random.randrange(y, y+height)
+
+    return (x,y)

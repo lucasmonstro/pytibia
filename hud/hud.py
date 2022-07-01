@@ -4,6 +4,13 @@ from utils import utils
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import dijkstra
 
+#HUD size config
+#Medium HUD
+hudSize = (480, 352)
+#Big HUD
+#hudSize = (960, 702)
+
+
 lifeBarBlackPixelsMapper = np.array([
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
     480, 506,
@@ -12,7 +19,7 @@ lifeBarBlackPixelsMapper = np.array([
 ])
 x = np.arange(lifeBarBlackPixelsMapper.size)
 lifeBarFlattenedImg = np.zeros(lifeBarBlackPixelsMapper.size)
-hudWidth = 480
+hudWidth = hudSize[0]
 creaturesNamesHashes = {
     "Centipede": utils.loadImgAsArray('hud/images/monsters/Centipede.png'),
     "Cobra": utils.loadImgAsArray('hud/images/monsters/Cobra.png'),
@@ -210,21 +217,20 @@ def getRightSidebarArrows(screenshot):
 def getCoordinates(screenshot):
     leftSidebarArrows = getLeftSidebarArrows(screenshot)
     rightSidebarArrows = getRightSidebarArrows(screenshot)
-    (hudWidth, hudHeight) = (480, 352)
+    (hudWidth, hudHeight) = hudSize
     hudCenter = (
         (rightSidebarArrows[0] - leftSidebarArrows[0]) // 2) + leftSidebarArrows[0]
     hudLeftPos = hudCenter - (hudWidth // 2) - 1
-    hud = screenshot[leftSidebarArrows[1] + 5: leftSidebarArrows[1] +
-                     5 + hudHeight, hudLeftPos:hudLeftPos + 1]
+    hud = screenshot[leftSidebarArrows[1] + 5: leftSidebarArrows[1] + 5 + hudHeight, hudLeftPos:hudLeftPos + 1]
     hud = np.where(np.logical_and(hud >= 18, hud <= 30), 1, 0)
     isHudDetected = np.all(hud == 1)
     if isHudDetected:
         x = hudLeftPos + 1
         y = leftSidebarArrows[1] + 5
-        bbox = (x, y, 480, 352)
+        bbox = (x, y, hudSize[0], hudSize[1])
         return bbox
 
 
 def getImgByCoordinates(screenshot, coordinates):
     return screenshot[coordinates[1]:coordinates[1] +
-                      352, coordinates[0]:coordinates[0] + 480]
+                      hudSize[1], coordinates[0]:coordinates[0] + hudSize[0]]
