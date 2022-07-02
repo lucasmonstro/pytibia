@@ -99,6 +99,12 @@ def getManaBar(screenshot, heartPos):
 def getStopPos(screenshot):
     return utils.locate(screenshot, stopImg)
 
+def getCap(screenshot):
+    (x, y, w, h) = getStopPos(screenshot)
+    capImg = utils.graysToBlack(utils.cropImg(screenshot, x - 44, y - 14, 32, 15))
+    capImg = utils.sharpenImage(capImg)
+    capValue = utils.imageToString(capImg, "6 -c tessedit_char_whitelist=0123456789")
+    return capValue
 
 def getSpecialConditionsContainer(screenshot):
     (left, top, width, height) = getStopPos(screenshot)

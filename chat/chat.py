@@ -2,28 +2,21 @@ import pyautogui
 from ahocorapy.keywordtree import KeywordTree
 from hud.hud import getLeftSidebarArrows
 from utils import utils
-import pytesseract
-from pytesseract import Output
 from utils.utils import cropImg
 
 chatMenuImg = utils.loadImgAsArray('chat/images/chatMenu.png')
 chatOnImg = utils.loadImgAsArray('chat/images/chatOn.png')
 chatOnImgTemp = utils.loadImgAsArray('chat/images/chatOnTemp.png')
 chatOffImg = utils.loadImgAsArray('chat/images/chatOff.png')
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
 
 
 def readMessagesFromActiveChatTab(screenshot):
     (x, y, width, height) = getChatMessagesContainerPos(screenshot)
     chatMessagesContainer = cropImg(screenshot, x, y, width, height)
     chatMessagesContainer = utils.graysToBlack(chatMessagesContainer)
-    messages = pytesseract.image_to_string(chatMessagesContainer, lang=None, config='--oem 3 --psm 6').splitlines()
+    messages = utils.imageToString(chatMessagesContainer, "6").splitlines()
     messages = list(filter(None, messages))
     return messages
-
-
-def onTextMatch(pos, patterns):
-    print("At pos %s found pattern: %s" % (pos, patterns))
 
 
 def getLootMessages(activeChatText):
@@ -92,7 +85,7 @@ def getServerLogTabPos(screenshot):
     chatCoordinates = getChatsTabs(screenshot)
     chatsBar = cropImg(screenshot, chatCoordinates[0], chatCoordinates[1], chatCoordinates[2], chatCoordinates[3])
     chatsBar = utils.graysToBlack(chatsBar)
-    d = pytesseract.image_to_data(chatsBar, output_type=Output.DICT)
+    d = utils.imageToTextData(chatsBar)
     n_boxes = len(d['level'])
     for i in range(n_boxes - 1):
         if d['text'][i] == 'Server' and d['text'][i + 1] == 'Log':

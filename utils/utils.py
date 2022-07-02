@@ -1,3 +1,4 @@
+import math
 import random
 import time
 import d3dshot
@@ -6,7 +7,10 @@ import numpy as np
 from PIL import Image
 import pyautogui
 import xxhash
+import pytesseract
+from pytesseract import Output
 
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
 d3 = d3dshot.create(capture_output='numpy')
 
 
@@ -19,9 +23,9 @@ def cacheObjectPos(func):
 
     def inner(screenshot):
         nonlocal lastX, lastY, lastW, lastH, lastImgHash
-        if(lastX != None and lastY != None and lastW != None and lastH != None):
+        if (lastX != None and lastY != None and lastW != None and lastH != None):
             copiedImg = np.ascontiguousarray(screenshot[lastY:lastY +
-                                                        lastH, lastX:lastX + lastW])
+                                                              lastH, lastX:lastX + lastW])
             copiedImgHash = hashit(copiedImg)
             if copiedImgHash == lastImgHash:
                 return (lastX, lastY, lastW, lastH)
@@ -38,6 +42,7 @@ def cacheObjectPos(func):
             screenshot[lastY:lastY + lastH, lastX:lastX + lastW])
         lastImgHash = hashit(lastImg)
         return (x, y, w, h)
+
     return inner
 
 
@@ -89,6 +94,14 @@ def graysToBlack(arr):
     return np.where(np.logical_and(arr >= 50, arr <= 100), 0, arr)
 
 
+def sharpenImage(img):
+    kernel = np.array([[0, -1, 0],
+                       [-1, 5, -1],
+                       [0, -1, 0]])
+    image_sharp = cv2.filter2D(src=img, ddepth=-1, kernel=kernel)
+    return image_sharp
+
+
 def hashit(arr):
     return xxhash.xxh64(np.ascontiguousarray(arr), seed=20220605).intdigest()
 
@@ -108,6 +121,16 @@ def hasMatrixInsideOther(matrix, other):
 
 def loadImg(path):
     return cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+
+
+def imageToString(screenshot, param):
+    paramStr = '--oem 3 --psm ' + param
+    messages = pytesseract.image_to_string(screenshot, lang=None, config=paramStr)
+    return messages
+
+
+def imageToTextData(image):
+    return pytesseract.image_to_data(image, output_type=Output.DICT)
 
 
 def loadImgAsArray(path):
@@ -134,15 +157,30 @@ def getScreenshot(window):
     return screenshot
 
 
+def getColoredScreenshot(window):
+    region = (window.top, window.left, window.width - 15, window.height)
+    screenshot = d3.screenshot(region=region)
+    return screenshot
+
+
+def loadColoredImg(path):
+    image = cv2.imread(path)
+    return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+
+def filterColorRange(image, upperBound, lowerBound):
+    imagemask = cv2.inRange(image, np.array(lowerBound), np.array(upperBound))
+    return imagemask
+
+
 def press(key):
     pyautogui.press(key)
 
 
 def typeKeyboard(phrase):
-
     words = list(phrase)
     for word in words:
-        time.sleep(random.randrange(70, 190)/1000)
+        time.sleep(random.randrange(70, 190) / 1000)
         press(word)
     time.sleep(random.randrange(70, 190) / 1000)
     press('enter')
@@ -156,11 +194,28 @@ def saveImg(arr, name):
     im = Image.fromarray(arr)
     im.save(name)
 
+
 def cropImg(img, x, y, width, height):
-    return img[y:y+height, x:x+width]
+    return img[y:y + height, x:x + width]
 
-def randomCoord(x,y,width,height):
-    x = random.randrange(x, x+width)
-    y = random.randrange(y, y+height)
 
-    return (x,y)
+def randomCoord(x, y, width, height):
+    x = random.randrange(x, x + width)
+    y = random.randrange(y, y + height)
+
+    return (x, y)
+
+
+def mouseMove(x, y):
+    pyautogui.moveTo(x, y)
+
+
+def mouseScroll(scrolls):
+    pyautogui.vscroll(scrolls)
+
+
+def mouseDrag(x1, y1, x2, y2):
+    pyautogui.moveTo(x1, y1)
+    pyautogui.mouseDown()
+    pyautogui.moveTo(x2, y2, 0.5)
+    pyautogui.mouseUp()
