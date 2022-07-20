@@ -313,7 +313,10 @@ def handleHungry(screenshot):
 
 def handleHaste(screenshot):
     if not player.core.hasSpecialCondition(screenshot, 'haste'):
-        utils.core.press('F9')
+        hasNoSupportCooldown = not cooldown.hasSupportCooldown(screenshot)
+        hasNoHasteCooldown = not cooldown.hasHasteCooldown(screenshot)
+        if not hasNoSupportCooldown and not hasNoHasteCooldown:
+            utils.core.press('F9')
     return
 
 
